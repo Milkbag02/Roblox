@@ -1,0 +1,53 @@
+local Mouse = game.Players.LocalPlayer:GetMouse()
+local Camera = workspace.CurrentCamera
+local env = getfenv().Enabled
+local env2 = getfenv().Injected
+
+if env2 == true then return end
+
+local function GetClosestPlayer()
+    local Closest = {nil, nil}
+    local MousePos = Vector2.new(Mouse.X, Mouse.Y)
+    for _, Player in pairs(game.Players:GetPlayers()) do
+        if Player == game.Players.LocalPlayer then continue end
+        local Character = Player.Character
+        if Character then
+            local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+            if HumanoidRootPart then
+                local vector, onScreen = Camera:WorldToScreenPoint(HumanoidRootPart.Position)
+                if onScreen then
+                    local Distance = (MousePos - Vector2.new(vector.X, vector.Y)).Magnitude
+                    if Closest[1] == nil then Closest = {Distance, Player} continue end
+                    if  Distance < Closest[1] then
+                        Closest = {Distance, Player}
+                    end
+                end
+            end
+        end
+    end
+    return Closest
+end
+
+local mt = getrawmetatable(game)
+setreadonly(mt,false)
+local last = mt.__namecall
+
+mt.__namecall = function(self, ...)
+    local args = {...}
+    local method = getnamecallmethod()
+    if env == true then
+        if tostring(self) == "MainEvent" and tostring(method) == "FireServer" then
+            if args[1]=="UpdateMousePos" then
+                local cp = GetClosestPlayer()
+                if cp[1] ~= nil and cp[2] ~=nil then
+                    args[2] = cp[2].Character.HumanoidRootPart.Position+(cp[2].Character.HumanoidRootPart.Velocity/math.pi)
+                    return self.FireServer(self, table.unpack(args))
+                end
+            elseif args[1] == "TeleportDetect" then
+                args[1] = ""
+                return self.FireServer(self, table.unpack(args))
+            end
+        end
+    end
+    return last(self,...);
+end
