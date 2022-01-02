@@ -1,6 +1,5 @@
 local Mouse = game.Players.LocalPlayer:GetMouse()
 local Camera = workspace.CurrentCamera
-local env = _G.Enabled
 
 local function GetClosestPlayer()
     local Closest = {nil, nil}
@@ -32,7 +31,6 @@ local last = mt.__namecall
 mt.__namecall = function(self, ...)
     local args = {...}
     local method = getnamecallmethod()
-    if env == true then
         if tostring(self) == "MainEvent" and tostring(method) == "FireServer" then
             if args[1]=="UpdateMousePos" then
                 local cp = GetClosestPlayer()
@@ -44,7 +42,6 @@ mt.__namecall = function(self, ...)
                 args[1] = ""
                 return self.FireServer(self, table.unpack(args))
             end
-        end
     end
     return last(self,...);
 end
