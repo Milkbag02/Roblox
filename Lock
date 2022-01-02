@@ -1,9 +1,6 @@
 local Mouse = game.Players.LocalPlayer:GetMouse()
 local Camera = workspace.CurrentCamera
-local env = getfenv().Enabled
-local env2 = getfenv().Injected
-
-if env2 == true then return end
+local env = _G.Enabled
 
 local function GetClosestPlayer()
     local Closest = {nil, nil}
